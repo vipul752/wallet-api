@@ -3,12 +3,19 @@ import cors from "cors";
 import { sql } from "./config/db.js";
 import rateLimiter from "./middleware/rateLimiter.js";
 import transactionsRoute from "./routes/transactionsRoute.js";
+import job from "./config/cron.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(rateLimiter);
 app.use(express.json());
+
+if (process.env.NODE_ENV === "production") job.start();
+
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
+});
 
 async function initDB() {
   try {
